@@ -1,17 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "importacion.h"
-#include "procesamiento.h"
-#include "analisis.h"
-#include "estadisticas.h"
-#include "persistence.h"
+#include "data_processing.h"
+//#include "procesamiento.h"
+//#include "analisis.h"
+//#include "estadisticas.h"
+//#include "persistence.h"
+
+ListaVentas listaVentas;
 
 void mostrarMenu();
 
 int main() {
     int opcion;
     // Cargar datos previos
-    cargarDatos();
+    //cargarDatos();
 
     do {
         mostrarMenu();
@@ -22,27 +25,28 @@ int main() {
                 importarDatos();
                 break;
             case 2:
-                procesarDatos();
+                printf("\n--- Procesamiento de Datos ---\n");
+                completarDatosFaltantes(&listaVentas);
+                eliminarDuplicados(&listaVentas);
                 break;
             case 3:
-                realizarAnalisis();
+                //realizarAnalisis();
                 break;
             case 4:
-                realizarAnalisisTemporal();
+                //realizarAnalisisTemporal();
                 break;
             case 5:
-                mostrarEstadisticas();
+                //mostrarEstadisticas();
                 break;
             case 6:
+                liberarListaVentas(&listaVentas);
                 printf("Saliendo del programa...\n");
                 break;
             default:
                 printf("Opción no válida. Intente de nuevo.\n");
         }
     } while(opcion != 6);
-
-    // Guardar datos antes de salir
-    guardarDatos();
+//guardarDatos();
 
     return 0;
 }
