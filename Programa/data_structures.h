@@ -1,6 +1,8 @@
 #ifndef DATA_STRUCTURES_H
 #define DATA_STRUCTURES_H
 
+#include <stddef.h>
+
 typedef struct {
     int venta_id;
     char fecha[11];
@@ -17,6 +19,8 @@ typedef struct {
     size_t tamano; // Número actual de ventas en el array
     size_t capacidad; // Capacidad máxima del array antes de redimensionar
 } ListaVentas;
+
+extern ListaVentas listaVentas; // Declaración de la variable listaVentas
 
 void inicializarListaVentas(ListaVentas *lista);
 void agregarVenta(ListaVentas *lista, Venta nuevaVenta);
