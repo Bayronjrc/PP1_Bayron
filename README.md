@@ -13,4 +13,4 @@ Número de proyecto programado: I
 
 Fecha de entrega: 2/09/2024
 
-Estatus de la entrega: Pendiente
+Estatus de la entrega: Muy Buena
