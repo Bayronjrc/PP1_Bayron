@@ -122,3 +122,43 @@ void diasSemanaMasActivo(const ListaVentas *lista) {
     printf("El dia de la semana más activo es %s con un total de %d transacciones.\n", 
            nombresDias[diaMasActivo], transaccionesPorDia[diaMasActivo]);
 }
+
+
+// Función para calcular el total de ventas en un trimestre específico
+double calcularVentasTrimestre(const ListaVentas *lista, int trimestre, int anio) {
+    double totalVentas = 0.0;
+    
+    for (size_t i = 0; i < lista->tamano; i++) {
+        struct tm tmFecha = {0};
+        sscanf(lista->ventas[i].fecha, "%Y-%m-%d", &tmFecha.tm_year, &tmFecha.tm_mon, &tmFecha.tm_mday);
+        tmFecha.tm_year -= 1900; // Ajustar el año
+        tmFecha.tm_mon -= 1; // Ajustar el mes
+        
+        if (tmFecha.tm_year == anio) {
+            int mes = tmFecha.tm_mon;
+            int trimestreVenta = (mes / 3) + 1;
+            
+            if (trimestreVenta == trimestre) {
+                totalVentas += lista->ventas[i].total;
+            }
+        }
+    }
+    
+    return totalVentas;
+}
+
+// Función para calcular la tasa de crecimiento entre trimestres
+void calcularTasaCrecimiento(int trimestreActual, int anioActual, int trimestreAnterior, int anioAnterior, const ListaVentas *lista) {
+    double ventasActual = calcularVentasTrimestre(lista, trimestreActual, anioActual);
+    double ventasAnterior = calcularVentasTrimestre(lista, trimestreAnterior, anioAnterior);
+
+    if (ventasAnterior == 0) {
+        printf("No hay ventas en el trimestre anterior para comparar.\n");
+        return;
+    }
+
+    double tasaCrecimiento = ((ventasActual - ventasAnterior) / ventasAnterior) * 100;
+
+    printf("La tasa de crecimiento de ventas del trimestre %d %d al trimestre %d %d es: %.2f%%\n",
+           trimestreAnterior, anioAnterior, trimestreActual, anioActual, tasaCrecimiento);
+}

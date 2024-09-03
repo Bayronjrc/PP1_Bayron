@@ -42,6 +42,8 @@ int main() {
                 printf("Realizando analisis temporal...\n");
                 mesConMayorVenta(&listaVentas);
                 diasSemanaMasActivo(&listaVentas);
+                printf("Calcular tasa de crecimiento...\n");
+                calcularTasaCrecimiento(2, 2023, 1, 2023, &listaVentas); 
                 printf("Analisis temporal completado.\n");
                 break;
             case 5:
