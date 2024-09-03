@@ -25,5 +25,8 @@ extern ListaVentas listaVentas; // Declaración de la variable listaVentas
 void inicializarListaVentas(ListaVentas *lista);
 void agregarVenta(ListaVentas *lista, Venta nuevaVenta);
 void liberarListaVentas(ListaVentas *lista);
+void imprimirListaVentas(const ListaVentas *lista); // Nueva función
+void cargarDatosJSON(ListaVentas *lista, const char *nombreArchivo);
+void guardarDatosJSON(const ListaVentas *lista, const char *nombreArchivo);
 
 #endif

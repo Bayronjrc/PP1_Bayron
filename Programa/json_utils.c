@@ -18,8 +18,14 @@ int cargarDatosDesdeArchivo(const char *rutaArchivo, ListaVentas *listaVentas) {
     fseek(archivo, 0, SEEK_SET);
 
     char *buffer = (char *)malloc(tamanoArchivo + 1);
-    fread(buffer, 1, tamanoArchivo, archivo);
-    buffer[tamanoArchivo] = '\0';
+    if (!buffer) {
+        perror("Error al asignar memoria");
+        fclose(archivo);
+        return 0;
+    }
+
+    size_t leidos = fread(buffer, 1, tamanoArchivo, archivo);
+    buffer[leidos] = '\0';
     fclose(archivo);
 
     // Parsear el buffer JSON
@@ -30,20 +36,94 @@ int cargarDatosDesdeArchivo(const char *rutaArchivo, ListaVentas *listaVentas) {
         return 0;
     }
 
+    // Verificar que el JSON es un array
+    if (!cJSON_IsArray(json)) {
+        printf("El JSON no es un array.\n");
+        cJSON_Delete(json);
+        free(buffer);
+        return 0;
+    }
+
     // Iterar sobre el array de ventas en el JSON
     cJSON *ventaJson = NULL;
     cJSON_ArrayForEach(ventaJson, json) {
+        if (!cJSON_IsObject(ventaJson)) {
+            printf("Elemento no es un objeto.\n");
+            continue;
+        }
+
         Venta nuevaVenta;
-        nuevaVenta.venta_id = cJSON_GetObjectItem(ventaJson, "venta_id")->valueint;
-        strcpy(nuevaVenta.fecha, cJSON_GetObjectItem(ventaJson, "fecha")->valuestring);
-        nuevaVenta.producto_id = cJSON_GetObjectItem(ventaJson, "producto_id")->valueint;
-        strcpy(nuevaVenta.producto_nombre, cJSON_GetObjectItem(ventaJson, "producto_nombre")->valuestring);
-        strcpy(nuevaVenta.categoria, cJSON_GetObjectItem(ventaJson, "categoria")->valuestring);
-        nuevaVenta.cantidad = cJSON_GetObjectItem(ventaJson, "cantidad")->valueint;
-        nuevaVenta.precio_unitario = cJSON_GetObjectItem(ventaJson, "precio_unitario")->valuedouble;
-        nuevaVenta.total = cJSON_GetObjectItem(ventaJson, "total")->valuedouble;
+
+        cJSON *item = cJSON_GetObjectItem(ventaJson, "venta_id");
+        if (cJSON_IsNumber(item)) {
+            nuevaVenta.venta_id = item->valueint;
+        } else {
+            printf("venta_id inválido o faltante.\n");
+            continue;
+        }
+
+        item = cJSON_GetObjectItem(ventaJson, "fecha");
+        if (cJSON_IsString(item)) {
+            strncpy(nuevaVenta.fecha, item->valuestring, sizeof(nuevaVenta.fecha) - 1);
+            nuevaVenta.fecha[sizeof(nuevaVenta.fecha) - 1] = '\0';
+        } else {
+            printf("fecha inválida o faltante en venta_id %d.\n", nuevaVenta.venta_id);
+            continue;
+        }
+
+        item = cJSON_GetObjectItem(ventaJson, "producto_id");
+        if (cJSON_IsNumber(item)) {
+            nuevaVenta.producto_id = item->valueint;
+        } else {
+            printf("producto_id inválido o faltante en venta_id %d.\n", nuevaVenta.venta_id);
+            continue;
+        }
+
+        item = cJSON_GetObjectItem(ventaJson, "producto_nombre");
+        if (cJSON_IsString(item)) {
+            strncpy(nuevaVenta.producto_nombre, item->valuestring, sizeof(nuevaVenta.producto_nombre) - 1);
+            nuevaVenta.producto_nombre[sizeof(nuevaVenta.producto_nombre) - 1] = '\0';
+        } else {
+            printf("producto_nombre inválido o faltante en venta_id %d.\n", nuevaVenta.venta_id);
+            continue;
+        }
+
+        item = cJSON_GetObjectItem(ventaJson, "categoria");
+        if (cJSON_IsString(item)) {
+            strncpy(nuevaVenta.categoria, item->valuestring, sizeof(nuevaVenta.categoria) - 1);
+            nuevaVenta.categoria[sizeof(nuevaVenta.categoria) - 1] = '\0';
+        } else {
+            printf("categoria inválida o faltante en venta_id %d.\n", nuevaVenta.venta_id);
+            continue;
+        }
+
+        item = cJSON_GetObjectItem(ventaJson, "cantidad");
+        if (cJSON_IsNumber(item)) {
+            nuevaVenta.cantidad = item->valueint;
+        } else {
+            printf("cantidad inválida o faltante en venta_id %d.\n", nuevaVenta.venta_id);
+            continue;
+        }
+
+        item = cJSON_GetObjectItem(ventaJson, "precio_unitario");
+        if (cJSON_IsNumber(item)) {
+            nuevaVenta.precio_unitario = item->valuedouble;
+        } else {
+            printf("precio_unitario inválido o faltante en venta_id %d.\n", nuevaVenta.venta_id);
+            continue;
+        }
+
+        item = cJSON_GetObjectItem(ventaJson, "total");
+        if (cJSON_IsNumber(item)) {
+            nuevaVenta.total = item->valuedouble;
+        } else {
+            printf("total inválido o faltante en venta_id %d.\n", nuevaVenta.venta_id);
+            continue;
+        }
 
         agregarVenta(listaVentas, nuevaVenta);
+        printf("Venta agregada: ID %d, Fecha %s, Total %.2f\n", nuevaVenta.venta_id, nuevaVenta.fecha, nuevaVenta.total);
+
     }
 
     // Liberar recursos
