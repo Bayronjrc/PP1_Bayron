@@ -6,7 +6,7 @@
 #define MAX_YEARS 100 // Define el rango de años que vamos a manejar
 
 // Calcula el total de ventas (suma de los importes de todas las ventas)
-double calcularTotalVentas(ListaVentas *lista) {
+double calcularTotalVentas(const ListaVentas *lista) {
     double total = 0.0;
     for (size_t i = 0; i < lista->tamano; i++) {
         total += lista->ventas[i].total;
@@ -15,7 +15,7 @@ double calcularTotalVentas(ListaVentas *lista) {
 }
 
 // Calcula el total de ventas por mes y año
-void calcularVentasMensualesAnuales(ListaVentas *lista) {
+void calcularVentasMensualesAnuales(const ListaVentas *lista) {
     double ventasMensuales[12] = {0};
     double ventasAnuales[MAX_YEARS] = {0}; // Suponiendo un máximo de 100 años de registros
 
@@ -23,11 +23,11 @@ void calcularVentasMensualesAnuales(ListaVentas *lista) {
         int year, month, day;
         sscanf(lista->ventas[i].fecha, "%d-%d-%d", &year, &month, &day);
 
-        if (year >= 2000 && year < 2000 + MAX_YEARS) {
+        if (month >= 1 && month <= 12 && year >= 2000 && year < 2000 + MAX_YEARS) {
             ventasMensuales[month - 1] += lista->ventas[i].total;
             ventasAnuales[year - 2000] += lista->ventas[i].total;
         } else {
-            printf("Anno fuera de rango: %d\n", year);
+            printf("Anno o mes fuera de rango: %d-%d\n", year, month);
         }
     }
 
@@ -57,7 +57,11 @@ void mesConMayorVenta(const ListaVentas *lista) {
     for (size_t i = 0; i < lista->tamano; i++) {
         int mes;
         sscanf(lista->ventas[i].fecha, "%*4d-%2d-%*2d", &mes); // Extrae el mes de la fecha
-        ventasMensuales[mes - 1] += lista->ventas[i].total;    // Acumula el total de ventas para el mes correspondiente
+        if (mes >= 1 && mes <= 12) {
+            ventasMensuales[mes - 1] += lista->ventas[i].total; // Acumula el total de ventas para el mes correspondiente
+        } else {
+            printf("Mes fuera de rango en la fecha: %s\n", lista->ventas[i].fecha);
+        }
     }
 
     // Determina cuál mes tiene el mayor total de ventas
@@ -76,14 +80,14 @@ void mesConMayorVenta(const ListaVentas *lista) {
 void diasSemanaMasActivo(const ListaVentas *lista) {
     int transaccionesPorDia[7] = {0}; // Array para contar transacciones por día de la semana
     const char *nombresDias[7] = { 
-        "Domingo", "Lunes", "Martes", "Miercoles", 
+        "Domingo", "Lunes", "Martes", "Miércoles", 
         "Jueves", "Viernes", "Sábado" 
     };
 
     // Iterar sobre todas las ventas en la lista
     for (size_t i = 0; i < lista->tamano; i++) {
         struct tm tmFecha = {0};
-        if (sscanf(lista->ventas[i].fecha, "%Y-%m-%d", &tmFecha.tm_year, &tmFecha.tm_mon, &tmFecha.tm_mday) != 3) {
+        if (sscanf(lista->ventas[i].fecha, "%d-%d-%d", &tmFecha.tm_year, &tmFecha.tm_mon, &tmFecha.tm_mday) != 3) {
             printf("Error al analizar la fecha: %s\n", lista->ventas[i].fecha);
             continue;
         }
@@ -98,7 +102,7 @@ void diasSemanaMasActivo(const ListaVentas *lista) {
 
         struct tm *diaInfo = localtime(&tiempoFecha); // Obtiene la información del día
         if (diaInfo == NULL) {
-            printf("Error al obtener la información del día para la fecha: %s\n", lista->ventas[i].fecha);
+            printf("Error al obtener la información del dia para la fecha: %s\n", lista->ventas[i].fecha);
             continue;
         }
 
@@ -115,6 +119,6 @@ void diasSemanaMasActivo(const ListaVentas *lista) {
     }
 
     // Mostrar el día de la semana con más transacciones
-    printf("El dia de la semana mas activo es %s con un total de %d transacciones.\n", 
+    printf("El dia de la semana más activo es %s con un total de %d transacciones.\n", 
            nombresDias[diaMasActivo], transaccionesPorDia[diaMasActivo]);
 }

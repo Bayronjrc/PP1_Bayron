@@ -6,7 +6,6 @@
 
 #define CAPACIDAD_INICIAL 10
 
-// Inicializa la lista dinámica de ventas
 void inicializarListaVentas(ListaVentas *lista) {
     lista->ventas = (Venta *)malloc(CAPACIDAD_INICIAL * sizeof(Venta));
     lista->tamano = 0;
@@ -14,27 +13,30 @@ void inicializarListaVentas(ListaVentas *lista) {
 }
 
 void agregarVenta(ListaVentas *lista, Venta venta) {
-    // Verificar si la lista necesita más capacidad
     if (lista->tamano >= lista->capacidad) {
         size_t nuevaCapacidad = lista->capacidad == 0 ? 10 : lista->capacidad * 2;
         Venta *nuevasVentas = (Venta *)realloc(lista->ventas, nuevaCapacidad * sizeof(Venta));
         if (nuevasVentas == NULL) {
-            printf("Error: No se pudo asignar memoria adicional para las ventas.\n");
+            //printf("Error: No se pudo asignar memoria adicional para las ventas.\n");
             return;
         }
         lista->ventas = nuevasVentas;
         lista->capacidad = nuevaCapacidad;
-        printf("Capacidad de la lista aumentada a %zu.\n", nuevaCapacidad);
+        //printf("Capacidad de la lista aumentada a %zu.\n", nuevaCapacidad);
     }
 
-    // Agregar la nueva venta a la lista
     lista->ventas[lista->tamano] = venta;
-    printf("Venta añadida: %d - %s - %s\n", venta.venta_id, venta.producto_nombre, venta.categoria);
+    //printf("Venta añadida: %d - %s - %s\n", venta.venta_id, venta.producto_nombre, venta.categoria);
     lista->tamano++;
-    printf("Total de ventas ahora: %zu\n", lista->tamano);
+    //printf("Total de ventas ahora: %zu\n", lista->tamano);
 }
-// Libera la memoria utilizada por la lista de ventas
+
 void liberarListaVentas(ListaVentas *lista) {
+    for (size_t i = 0; i < lista->tamano; i++) {
+        free(lista->ventas[i].fecha);
+        free(lista->ventas[i].producto_nombre);
+        free(lista->ventas[i].categoria);
+    }
     free(lista->ventas);
     lista->ventas = NULL;
     lista->tamano = 0;
@@ -91,7 +93,6 @@ void cargarDatosJSON(ListaVentas *lista, const char *nombreArchivo) {
         return;
     }
 
-    // Leer todo el contenido del archivo
     fseek(archivo, 0, SEEK_END);
     long tamanoArchivo = ftell(archivo);
     fseek(archivo, 0, SEEK_SET);
@@ -100,7 +101,6 @@ void cargarDatosJSON(ListaVentas *lista, const char *nombreArchivo) {
     contenidoArchivo[tamanoArchivo] = '\0';
     fclose(archivo);
 
-    // Parsear el JSON
     cJSON *json = cJSON_Parse(contenidoArchivo);
     free(contenidoArchivo);
     if (json == NULL) {
@@ -111,8 +111,6 @@ void cargarDatosJSON(ListaVentas *lista, const char *nombreArchivo) {
     cJSON *ventaJSON = NULL;
     cJSON_ArrayForEach(ventaJSON, json) {
         Venta venta;
-        
-        // Parsear cada campo de la venta
         cJSON *venta_id = cJSON_GetObjectItemCaseSensitive(ventaJSON, "venta_id");
         cJSON *fecha = cJSON_GetObjectItemCaseSensitive(ventaJSON, "fecha");
         cJSON *producto_id = cJSON_GetObjectItemCaseSensitive(ventaJSON, "producto_id");
@@ -127,16 +125,15 @@ void cargarDatosJSON(ListaVentas *lista, const char *nombreArchivo) {
             cJSON_IsNumber(cantidad) && cJSON_IsNumber(precio_unitario) && cJSON_IsNumber(total)) {
 
             venta.venta_id = venta_id->valueint;
-            strcpy(venta.fecha, fecha->valuestring);
+            venta.fecha = strdup(fecha->valuestring);
             venta.producto_id = producto_id->valueint;
-            strcpy(venta.producto_nombre, producto_nombre->valuestring);
-            strcpy(venta.categoria, categoria->valuestring);
+            venta.producto_nombre = strdup(producto_nombre->valuestring);
+            venta.categoria = strdup(categoria->valuestring);
             venta.cantidad = cantidad->valueint;
             venta.precio_unitario = precio_unitario->valuedouble;
             venta.total = total->valuedouble;
 
-            // Intentar agregar la venta
-            printf("Intentando agregar la venta ID %d\n", venta.venta_id);
+            //printf("Intentando agregar la venta ID %d\n", venta.venta_id);
             agregarVenta(lista, venta);
         } else {
             printf("Error: Faltan campos en la venta ID %d o están mal formados.\n", venta_id->valueint);

@@ -6,7 +6,8 @@
 
 // Función para importar datos desde un archivo JSON
 void importarDatos() {
-    char rutaArchivo[256];
+    char* rutaArchivo;
+    rutaArchivo = (char*)malloc(256 * sizeof(char));
     
 
     printf("Ingrese la ruta del archivo JSON a importar: ");

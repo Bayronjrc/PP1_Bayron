@@ -5,14 +5,15 @@
 
 typedef struct {
     int venta_id;
-    char fecha[11];
+    char *fecha;             
     int producto_id;
-    char producto_nombre[50];
-    char categoria[30];
+    char *producto_nombre;  
+    char *categoria;         
     int cantidad;
     double precio_unitario;
     double total;
 } Venta;
+
 
 typedef struct {
     Venta *ventas; // Array dinámico de ventas

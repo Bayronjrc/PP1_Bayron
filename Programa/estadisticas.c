@@ -2,11 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include "estadisticas.h"
-#include "hpdf.h"
+//#include "hpdf.h"
 #include "data_structures.h"
 
 typedef struct {
-    char categoria[50];
+    char *categoria;
     double montoTotal;
 } CategoriaVenta;
 
@@ -19,7 +19,7 @@ int compararCategorias(const void *a, const void *b) {
 
 // Función para calcular y mostrar el Top 5 de categorías con mayores ventas
 void mostrarTop5Categorias(const ListaVentas *lista) {
-    CategoriaVenta categorias[100]; // Asumimos un máximo de 100 categorías diferentes
+    CategoriaVenta *categorias = (CategoriaVenta *)malloc(100 * sizeof(CategoriaVenta)); // Asumimos un máximo de 100 categorías diferentes
     int numCategorias = 0;
 
     // Iterar sobre las ventas y acumular montos por categoría
@@ -39,7 +39,7 @@ void mostrarTop5Categorias(const ListaVentas *lista) {
         
         // Si la categoría no existe, se agrega una nueva entrada
         if (!encontrada) {
-            strcpy(categorias[numCategorias].categoria, categoriaActual);
+            categorias[numCategorias].categoria = strdup(categoriaActual); // Asignar memoria para la categoría
             categorias[numCategorias].montoTotal = montoActual;
             numCategorias++;
         }
@@ -53,8 +53,14 @@ void mostrarTop5Categorias(const ListaVentas *lista) {
     for (int i = 0; i < numCategorias && i < 5; i++) {
         printf("%d. %s: %.2f\n", i + 1, categorias[i].categoria, categorias[i].montoTotal);
     }
-}
 
+    // Liberar memoria
+    for (int i = 0; i < numCategorias; i++) {
+        free(categorias[i].categoria);
+    }
+    free(categorias);
+}
+/*
 void exportarTop5CategoriasPDF(const ListaVentas *lista) {
     HPDF_Doc pdf = HPDF_New(NULL, NULL);
     if (!pdf) {
@@ -69,9 +75,9 @@ void exportarTop5CategoriasPDF(const ListaVentas *lista) {
     HPDF_Page_SetFontAndSize(page, HPDF_GetFont(pdf, "Helvetica", NULL), 12);
     HPDF_Page_MoveTextPos(page, 50, 750);
 
-    HPDF_Page_ShowText(page, "Top 5 de categorias con mayores ventas:");
+    HPDF_Page_ShowText(page, "Top 5 de categorías con mayores ventas:");
 
-    CategoriaVenta categorias[100];
+    CategoriaVenta *categorias = (CategoriaVenta *)malloc(100 * sizeof(CategoriaVenta));
     int numCategorias = 0;
 
     for (size_t i = 0; i < lista->tamano; i++) {
@@ -88,7 +94,7 @@ void exportarTop5CategoriasPDF(const ListaVentas *lista) {
         }
 
         if (!encontrada) {
-            strcpy(categorias[numCategorias].categoria, categoriaActual);
+            categorias[numCategorias].categoria = strdup(categoriaActual); // Asignar memoria para la categoría
             categorias[numCategorias].montoTotal = montoActual;
             numCategorias++;
         }
@@ -107,17 +113,22 @@ void exportarTop5CategoriasPDF(const ListaVentas *lista) {
     HPDF_SaveToFile(pdf, "estadisticas_top5.pdf");
     HPDF_Free(pdf);
 
+    // Liberar memoria
+    for (int i = 0; i < numCategorias; i++) {
+        free(categorias[i].categoria);
+    }
+    free(categorias);
+
     printf("Top 5 exportado a PDF.\n");
 }
-
-
+*/
 // Función para mostrar estadísticas
 void mostrarEstadisticas(const ListaVentas *lista) {
-    printf("Mostrando estadisticas...\n");
+    printf("Mostrando estadísticas...\n");
 
     // Llama a la función para mostrar el Top 5 de categorías con mayores ventas
     mostrarTop5Categorias(lista);
-    exportarTop5CategoriasPDF(lista);
+    //exportarTop5CategoriasPDF(lista);
 
     printf("Estadisticas mostradas.\n");
 }
